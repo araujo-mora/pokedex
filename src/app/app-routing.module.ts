@@ -3,16 +3,16 @@ import { Routes, RouterModule } from '@angular/router';
 
 export const routes: Routes = [
   {
-    path: 'pokedex',
+    path: 'home',
     loadChildren: () =>
-      import('./modules/pokedex/pokedex.module').then((m) => m.PokedexModule),
+      import('./layout/layout.module').then((m) => m.LayoutModule),
   },
   {
     path: 'error',
     loadChildren: () =>
       import('./modules/errors/errors.module').then((m) => m.ErrorsModule),
   },
-  { path: '', redirectTo: 'pokedex', pathMatch: 'full' },
+  { path: '', redirectTo: 'home', pathMatch: 'full' },
   { path: '**', redirectTo: 'error/error-1' },
 ];
 

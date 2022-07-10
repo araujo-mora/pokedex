@@ -10,10 +10,10 @@ const routes: Routes = [
     component: PokedexComponent,
     children: [
       {
-        path: 'home',
+        path: 'index',
         component: PokedexHomeComponent,
       },
-      { path: '', redirectTo: 'home', pathMatch: 'full' },
+      { path: '', redirectTo: 'index', pathMatch: 'full' },
       {
         path: '**',
         component: Error1Component,

@@ -11,6 +11,11 @@ export class PokemonService extends HttpService {
   }
 
   public getAll(): Observable<any> {
-    return this.get(this.URLApi);
+    const url = `${this.URLApi}/`;
+    return this.get(url);
+  }
+
+  public getOne(url): Observable<any> {
+    return this.get(url);
   }
 }

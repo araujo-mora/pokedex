@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
 export class HttpService {
   constructor(public _http: HttpClient) {  }
 
-  URLApi = 'https://pokeapi.co/api/v2/pokemon/';
+  URLApi = 'https://pokeapi.co/api/v2/pokemon';
 
   public get(url: string): Observable<any> {
     return this._http.request('GET', url, {responseType:'json', headers: new HttpHeaders().set("Content-Type","application/json")});
