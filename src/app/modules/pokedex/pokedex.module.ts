@@ -20,7 +20,7 @@ import { DataRenderPipe } from 'src/app/pipes/data-render.pipe';
   imports: [
     CommonModule,
     PokedexRoutingModule,
-    HttpClientModule
+    HttpClientModule,
   ],
   providers:[
     PokemonService,
