@@ -1,9 +1,10 @@
-import { Component, HostListener, Inject, OnDestroy, OnInit } from '@angular/core';
-import { forkJoin, Observable, Subscription } from 'rxjs';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Subscription } from 'rxjs';
 import * as _ from 'lodash';
 import { PokemonService } from 'src/app/services/pokemon.service';
 import { DataShareService } from 'src/app/services/data-share.service';
-import { DOCUMENT } from '@angular/common';
+
+declare var $: any;
 
 @Component({
   selector: 'app-pokedex-home',
@@ -13,78 +14,91 @@ import { DOCUMENT } from '@angular/common';
 export class PokedexHomeComponent implements OnInit, OnDestroy {
 
   private unsubscribe: Subscription[] = [];
-  private _pokemonObj: Observable<any>[] = [];
-  public showList: boolean;
   _pokemonList:any = [];
-  showMoreButton: boolean = false;
 
-  @HostListener('window:scroll')
-  onWindowScroll():void{
-    const offset = window.pageYOffset;
-    const scrollTop = this.document.documentElement.scrollTop;
-    this.showMoreButton = (offset || scrollTop) > 500;
-  }
+  public limit = 19;
+  public offset = 1;
+  public lastPokemonId = 905;
+  public getNextPage = true;
+  public showDetails = false;
 
   constructor(
-    @Inject(DOCUMENT) private document: Document,
     public _pokemonService: PokemonService,
     public _share: DataShareService,
-  ) {
-    const changeView = this._share.flag$.subscribe((flag)=>{
-      if(_.isBoolean(flag))
-        this.showList = flag;
-    });
-    this.unsubscribe.push(changeView);
-   }
+  ) {   }
 
   ngOnInit(): void {
-    this.getAll();
-  }
-
-  ngOnDestroy(): void {
-    this.unsubscribe.forEach((sb) => sb.unsubscribe());
-  }
-
-  getAll(){
-    const pokeAllSub = this._pokemonService.getAll().subscribe(
-      (data)=>{
-        _.forEach(data.results, (pokemon) =>{
-          this._pokemonObj.push(this._pokemonService.getOne(pokemon.url));
-        });
-
-        forkJoin(this._pokemonObj).subscribe((response) => {
-          var aux = [];
-          response.forEach(poke => {
-            var obj = {
-              id: poke.id,
-              name: poke.name,
-              img: poke.sprites.front_default
-            };
-            aux.push(obj);
-          });
-          this._pokemonList = _.orderBy(aux, ["id"], ["asc"]);
-        });
-      },
-      (error)=>{
-        console.log(error);
+    var modalSub = this._share.openModal$.subscribe((showDetails)=>{
+      if(_.isBoolean(showDetails)){
+        this.showDetails = showDetails;
+        setTimeout(()=>{$("#pokemonDetails").modal("show");},200);
       }
-    );
-    this.unsubscribe.push(pokeAllSub);
+    });
+    this.unsubscribe.push(modalSub);
+    this.getPokemons(this.offset,this.limit);
+    $('#pokemonDetails').on('hidden.bs.modal', ()=> {
+      this.showDetails = false;
+    });
   }
 
-  getOne(pokemonURL){
-    const pokeSub = this._pokemonService.getOne(pokemonURL).subscribe((pokemon)=>{
+  getPokemon(id:number){
+    const pokeSub = this._pokemonService.getPokemon(id).subscribe((pokemon)=>{
       let poke = {
         id: pokemon.id,
         name: pokemon.name,
-        img: pokemon.sprites.front_default
+        img: pokemon.sprites.front_default,
+        stats: pokemon.stats,
+        height: pokemon.height,
+        weight: pokemon.weight,
+        types: pokemon.types,
+        species: pokemon.species.url
       };
       this._pokemonList.push(poke);
+      this._pokemonList = _.orderBy(this._pokemonList, ["id"], ["asc"]);
     });
     this.unsubscribe.push(pokeSub);
   }
 
-  onScrollTop(){
-    this.document.documentElement.scrollTop = 0;
+  getPokemons(offset: number, limit:number){
+    var max = offset + limit;
+    for(let i = offset; i <= max; i++){
+      if(i<=this.lastPokemonId){
+        this.getPokemon(i);
+      }else{
+        this.getNextPage = false;
+        break;
+      }
+    }
+  }
+
+  onScrollDown(): void{
+    if(this.getNextPage){
+      this.offset += 20;
+      this.getPokemons(this.offset,this.limit);
+    }
+  }
+
+  getPokemonDetails(event): void{
+    var pokeID: number = parseInt(event.currentTarget.id);
+    var poke = this.findPokemon(pokeID, this._pokemonList);
+    this._share.sharePokemon(poke);
+    this.showDetails = true;
+    setTimeout(()=>{$("#pokemonDetails").modal("show");},200);
+  }
+
+  findPokemon(pokeID: number, pokemons: any) {
+    let pokeSelected = _.find(pokemons, { 'id': pokeID });
+    if (!pokeSelected) {
+      pokeSelected = _.some(pokemons, { 'id': pokeID });
+    }
+    return pokeSelected;
+  }
+
+  fillFromSearch(){
+    
+  }
+
+  ngOnDestroy(): void {
+    this.unsubscribe.forEach((sb) => sb.unsubscribe());
   }
 }

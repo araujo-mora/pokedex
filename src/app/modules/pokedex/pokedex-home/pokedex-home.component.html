@@ -1,32 +1,19 @@
-<div class="accordion" id="advancedSearch">
-    <div class="card">
-      <div class="card-header p-0" id="headingOne">
-          <button class="btn btn-block text-center" type="button" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-            Advanced search
-          </button>
-      </div>
-  
-      <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#advancedSearch">
-        <div class="card-body">
-          Some placeholder content for the first accordion panel. This panel is shown by default, thanks to the <code>.show</code> class.
-        </div>
+<div infiniteScroll (scrolled)="onScrollDown()" class="container">
+  <div class="row row-cols-1 row-cols-xs-1 row-cols-sm-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 row-cols-xxl-4">
+    <div *ngFor="let pokemon of _pokemonList" class="col py-3">
+      <div id="{{pokemon.id}}" (click)="getPokemonDetails($event)" class="card">
+        <img src="{{pokemon.img}}" class="card-img-top bg-gray-200" alt="...">
+          <div class="card-body">
+            <p class="card-text custom-text">{{pokemon.id | dataRender : 'number'}}</p>
+            <p class="card-text font-weight-bolder name-text">{{pokemon.name | dataRender : 'name'}}</p>
+          </div>
       </div>
     </div>
   </div>
-<div class="container">
-    <div class="row row-cols-1 row-cols-xs-1 row-cols-sm-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 row-cols-xxl-4">
-        <div *ngFor="let pokemon of _pokemonList" class="col py-3">
-          <div class="card">
-            <img src="{{pokemon.img}}" class="card-img-top bg-gray-200" alt="...">
-              <div class="card-body">
-                <p class="card-text custom-text">{{pokemon.id | dataRender : 'number'}}</p>
-                <p class="card-text text-center font-weight-bolder name-text">{{pokemon.name | dataRender : 'name'}}</p>
-              </div>
-          </div>
-        </div>
-      </div>
 </div>
-<button *ngIf="showMoreButton" (click)="onScrollTop()" class="btn btn-icon btn-light btn-hover-primary btn-lg btn-fixed">
-    <i class="bi bi-arrow-down-circle-fill"></i>
-</button>
+
+<div *ngIf="showDetails">
+  <app-pokemon-details-modal></app-pokemon-details-modal>
+</div>
+
   
